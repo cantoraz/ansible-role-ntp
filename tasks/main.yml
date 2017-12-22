@@ -1,0 +1,21 @@
+---
+# This playbook will install NTP
+
+- name: Ensure NTP-related packages are installed
+  package: name={{ item }} state=present
+  with_items:
+    - ntp
+
+- name: Configure NTP
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  notify:
+    - restart ntp
+  when: ntp_manage_config
+
+- name: Ensure NTP is running and enabled
+  service: name="{{ ntp_daemon }}" state=started enabled=yes
+  when: ntp_enabled
+
+- name: Ensure NTP is running and disabled
+  service: name={{ ntp_daemon }} state=started enabled=no
+  when: not ntp_enabled
